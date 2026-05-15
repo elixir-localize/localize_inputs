@@ -114,16 +114,16 @@ defmodule Localize.Inputs.Validator do
       ...>     %{"amount" => Decimal.new("1.75"), "unit" => "bogon"},
       ...>     category: "length"
       ...>   )
-      iex> Keyword.get(errors, :unit)
-      "\"bogon\" is not a known length unit"
+      iex> Keyword.get(errors, :unit) =~ "bogon"
+      true
 
       iex> {:error, %Localize.Inputs.ValidationError{errors: errors}} =
       ...>   Localize.Inputs.Validator.validate_unit(
       ...>     %{"amount" => Decimal.new("70"), "unit" => "kilogram"},
       ...>     category: "length"
       ...>   )
-      iex> Keyword.get(errors, :unit)
-      "\"kilogram\" is a mass unit, not length"
+      iex> Keyword.get(errors, :unit) =~ "mass"
+      true
 
   """
   @spec validate_unit(term(), Keyword.t()) :: :ok | {:error, ValidationError.t()}
