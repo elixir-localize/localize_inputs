@@ -47,7 +47,7 @@ defmodule Localize.Inputs.MixProject do
       maintainers: ["Kip Cole"],
       licenses: ["Apache-2.0"],
       links: links(),
-      files: ~w(lib priv mix.exs README.md CHANGELOG.md LICENSE.md)
+      files: ~w(lib priv guides mix.exs README.md CHANGELOG.md LICENSE.md)
     ]
   end
 
@@ -63,8 +63,16 @@ defmodule Localize.Inputs.MixProject do
     [
       source_ref: "v#{@version}",
       main: "readme",
-      extras: ["README.md", "CHANGELOG.md", "LICENSE.md"],
-      formatters: ["html"],
+      extras: [
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE.md",
+        "guides/integration.md"
+      ],
+      groups_for_extras: [
+        Guides: ~r/guides\/.*/
+      ],
+      formatters: ["html", "markdown"],
       groups_for_modules: groups_for_modules(),
       skip_code_autolink_to: [
         "Ecto.Changeset.t/0",

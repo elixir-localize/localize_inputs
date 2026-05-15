@@ -4,6 +4,8 @@ Locale-aware HTML form input components. Today: `<.number_input>`. More inputs w
 
 Built on top of [`localize`](https://hex.pm/packages/localize). Wraps [AutoNumeric](https://autonumeric.org/) by Alexandre Bonneau (MIT-licensed) for live formatting and cursor preservation — the JS hook is a thin adapter that configures AutoNumeric from the component's locale data and lets it run. Credit where it's due.
 
+For a full end-to-end Phoenix integration walkthrough — Elixir deps, JS deps, asset wiring, schema, LiveView — read the [integration guide](https://hexdocs.pm/localize_inputs/integration.html).
+
 ## Installation
 
 ```elixir
@@ -16,18 +18,14 @@ def deps do
     {:phoenix_live_view, "~> 1.0"},
 
     # Activate the Ecto changeset bridge:
-    {:ecto, "~> 3.10"},
-
-    # Activate the visualizer:
-    {:plug, "~> 1.15", only: :dev},
-    {:bandit, "~> 1.5",  only: :dev}
+    {:ecto, "~> 3.10"}
   ]
 end
 ```
 
 The `phoenix_html`, `phoenix_live_view`, `ecto`, and `gettext` deps are all optional — the headless parser/validator compile without any of them. Each layer activates when its dep is present.
 
-For a Plug-based visualizer that demos `<.number_input>` across CLDR locales, see the sibling [`localize_inputs_playground`](https://github.com/elixir-localize/localize_inputs_playground) package.
+For a Plug-based visualizer that demos `<.number_input>` across CLDR locales, see the sibling [`localize_inputs_playground`](https://github.com/elixir-localize/localize_inputs_playground) package. A live instance runs at <https://localize-inputs-playground.fly.dev>.
 
 ## Layered API
 

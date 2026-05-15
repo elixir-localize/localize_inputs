@@ -37,9 +37,12 @@ if Code.ensure_loaded?(Phoenix.Component) do
     (`Localize.Inputs.Parser.parse_number/2`) accepts whatever
     the user typed on submit.
 
-    The form value submits as the canonical period-decimal form
-    on submit (e.g. `"1234.56"`), suitable for casting straight
-    into a `Decimal` or `:integer` Ecto field.
+    The form value submits in the user's *locale-formatted* shape
+    — exactly what AutoNumeric was displaying. Parse it on the
+    server with `Localize.Inputs.Parser.parse_number/2` (or
+    `Localize.Inputs.Changeset.validate_number/3` for an
+    Ecto-backed flow). One wire shape regardless of whether the
+    JS hook is loaded — no canonical-vs-locale ambiguity.
 
     ### Arguments
 
