@@ -1,7 +1,7 @@
 defmodule Localize.Inputs.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @source_url "https://github.com/elixir-localize/localize_inputs"
 
   def project do
@@ -18,7 +18,7 @@ defmodule Localize.Inputs.MixProject do
       docs: docs(),
       elixirc_paths: elixirc_paths(Mix.env()),
       dialyzer: [
-        plt_add_apps: ~w(ecto gettext mix phoenix_html phoenix_live_view plug)a,
+        plt_add_apps: ~w(ecto gettext mix phoenix_html phoenix_live_view)a,
         flags: [
           :error_handling,
           :unknown,
@@ -38,8 +38,8 @@ defmodule Localize.Inputs.MixProject do
 
   defp description do
     "Locale-aware HTML form input components. Today: <.number_input>. " <>
-      "Ships a headless parser/formatter/validator, an AutoNumeric-backed JS hook, and " <>
-      "a Plug-based visualizer for local development."
+      "Ships a headless parser/validator, an AutoNumeric-backed JS hook, and an " <>
+      "Ecto changeset bridge."
   end
 
   defp package do
@@ -66,8 +66,6 @@ defmodule Localize.Inputs.MixProject do
       extras: ["README.md", "CHANGELOG.md", "LICENSE.md"],
       formatters: ["html"],
       groups_for_modules: groups_for_modules(),
-      # External-package references that ex_doc can't follow
-      # because the host package isn't in this docs build.
       skip_code_autolink_to: [
         "Ecto.Changeset.t/0",
         "Supervisor.child_spec/0",
@@ -82,24 +80,24 @@ defmodule Localize.Inputs.MixProject do
       Components: ~r/^Localize\.Inputs\.Components(\.|$)/,
       "Headless API": [
         Localize.Inputs.Parser,
-        Localize.Inputs.Formatter,
         Localize.Inputs.Validator,
         Localize.Inputs.Locale,
         Localize.Inputs.Changeset
       ],
-      Visualizer: ~r/^Localize\.Inputs\.Visualizer(\.|$)/
+      Exceptions: [
+        Localize.Inputs.NoNumberSymbolsError,
+        Localize.Inputs.ValidationError
+      ]
     ]
   end
 
   defp deps do
     [
-      {:localize, "~> 0.27", path: "../localize"},
+      {:localize, "~> 0.36"},
       {:phoenix_html, "~> 4.0", optional: true},
       {:phoenix_live_view, "~> 1.0", optional: true},
       {:ecto, "~> 3.10", optional: true},
       {:gettext, "~> 1.0", optional: true},
-      {:plug, "~> 1.15", optional: true},
-      {:bandit, "~> 1.5", optional: true},
       {:ex_doc, "~> 0.30", only: [:dev, :release], runtime: false},
       {:dialyxir, "~> 1.4", only: :dev, runtime: false}
     ]

@@ -3,7 +3,6 @@ defmodule Localize.InputsTest do
 
   doctest Localize.Inputs
   doctest Localize.Inputs.Parser
-  doctest Localize.Inputs.Formatter
   doctest Localize.Inputs.Validator
   doctest Localize.Inputs.Locale
 
@@ -26,18 +25,6 @@ defmodule Localize.InputsTest do
     test "blank input is nil" do
       assert {:ok, nil} = Localize.Inputs.Parser.parse_number("", locale: :en)
       assert {:ok, nil} = Localize.Inputs.Parser.parse_number(nil, locale: :en)
-    end
-  end
-
-  describe "Formatter.format_number/2" do
-    test "en uses period decimal" do
-      assert Localize.Inputs.Formatter.format_number(Decimal.new("1234.56"), locale: :en) ==
-               "1,234.56"
-    end
-
-    test "de uses comma decimal" do
-      assert Localize.Inputs.Formatter.format_number(Decimal.new("1234.56"), locale: :de) ==
-               "1.234,56"
     end
   end
 

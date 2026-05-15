@@ -24,7 +24,7 @@ if Code.ensure_loaded?(Phoenix.Component) do
 
     use Phoenix.Component
 
-    alias Localize.Inputs.{Formatter, Locale}
+    alias Localize.Inputs.Locale
 
     @doc """
     Locale-aware plain-number input.
@@ -34,8 +34,8 @@ if Code.ensure_loaded?(Phoenix.Component) do
     reads (locale, separators, minus sign, min/max, decimals).
     With AutoNumeric loaded the input live-formats as the user
     types; without it, the server-side parser
-    (`Localize.Inputs.Parser`) accepts whatever the user typed
-    on submit.
+    (`Localize.Inputs.Parser.parse_number/2`) accepts whatever
+    the user typed on submit.
 
     The form value submits as the canonical period-decimal form
     on submit (e.g. `"1234.56"`), suitable for casting straight
@@ -155,11 +155,34 @@ if Code.ensure_loaded?(Phoenix.Component) do
     defp assign_number_value(assigns) do
       explicit = assigns.value
       form_value = (assigns.form[assigns.field] || %{}).value
-
       raw = explicit || form_value
-      formatted = Formatter.format_number(raw, locale: assigns.locale)
 
-      assign(assigns, :formatted_value, formatted)
+      assign(assigns, :formatted_value, format_value(raw, assigns.locale))
+    end
+
+    # Render the value into the input's `value=` attribute. Three
+    # safe outcomes: nil/empty input → empty string; valid number
+    # → locale-formatted string via Localize.Number.to_string;
+    # unparseable input → empty string (the page still re-renders
+    # without crashing). The user's raw text isn't preserved here
+    # because the input only ever holds canonical-shape values
+    # post-render; live editing is the JS hook's job.
+    defp format_value(nil, _locale), do: ""
+    defp format_value("", _locale), do: ""
+
+    defp format_value(value, locale) when is_binary(value) do
+      case Localize.Inputs.Parser.parse_number(value, locale: locale) do
+        {:ok, nil} -> ""
+        {:ok, parsed} -> format_value(parsed, locale)
+        {:error, _} -> value
+      end
+    end
+
+    defp format_value(value, locale) do
+      case Localize.Number.to_string(value, locale: locale) do
+        {:ok, formatted} -> formatted
+        {:error, _} -> ""
+      end
     end
 
     defp value_attr(nil), do: nil

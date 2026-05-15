@@ -25,7 +25,9 @@ def deps do
 end
 ```
 
-The `phoenix_html`, `phoenix_live_view`, `ecto`, `plug`, `bandit` and `gettext` deps are all optional — the headless parser/formatter/validator compile without any of them. Each layer activates when its dep is present.
+The `phoenix_html`, `phoenix_live_view`, `ecto`, and `gettext` deps are all optional — the headless parser/validator compile without any of them. Each layer activates when its dep is present.
+
+For a Plug-based visualizer that demos `<.number_input>` across CLDR locales, see the sibling [`localize_inputs_playground`](https://github.com/elixir-localize/localize_inputs_playground) package.
 
 ## Layered API
 
@@ -34,12 +36,12 @@ The `phoenix_html`, `phoenix_live_view`, `ecto`, `plug`, `bandit` and `gettext` 
 ```elixir
 {:ok, %Decimal{} = decimal} = Localize.Inputs.Parser.parse_number("1.234,56", locale: :de)
 
-Localize.Inputs.Formatter.format_number(decimal, locale: :en)
+Localize.Number.to_string!(decimal, locale: :en)
 #=> "1,234.56"
 
 :ok = Localize.Inputs.Validator.validate_number(decimal, min: 0)
 
-{:ok, info} = Localize.Inputs.Locale.resolve(:de)
+{:ok, info} = Localize.Inputs.Locale.for_locale(:de)
 info.decimal   #=> ","
 info.group     #=> "."
 ```
@@ -102,25 +104,21 @@ If you're porting from an Option B library, the thing to double-check is that th
 
 ## Visualizer
 
-A Plug-based development tool that demos the component across CLDR locales with a light/dark theme toggle. Refuses to start unless the enable flag is set:
+A Plug-based development tool that demos the component across CLDR locales lives in the sibling [`localize_inputs_playground`](https://github.com/elixir-localize/localize_inputs_playground) package — clone and `mix run --no-halt`, or deploy to Fly.io. To embed it inside your own Phoenix dev router:
 
 ```elixir
-# In config/dev.exs:
-config :localize_inputs, visualizer: true
+# mix.exs
+{:localize_inputs_playground, "~> 0.1", only: :dev}
 
-# Standalone (zero-config):
-{:ok, _pid} = Localize.Inputs.Visualizer.Standalone.start(port: 4003)
+# router.ex
+if Mix.env() == :dev do
+  forward "/inputs", LocalizeInputsPlayground.Visualizer
+end
 
-# Or mount into a host Phoenix app:
-forward "/inputs", Localize.Inputs.Visualizer
+# config/dev.exs — visualizer is gated to keep it out of prod by accident
+config :localize_inputs_playground, visualizer: true
+config :localize, allow_runtime_locale_download: true
 ```
-
-Tabs:
-
-* **`/input`** — interactive `<.number_input>` demo with locale + AutoNumeric mounted.
-* **`/parse`** — same input, every locale, side-by-side (separator inversion, paste tolerance).
-* **`/format`** — same parsed value, every locale.
-* **`/locale`** — the `Localize.Inputs.Locale.resolve/1` snapshot per locale.
 
 ## License
 

@@ -11,9 +11,11 @@ defmodule Localize.Inputs do
   The package ships three layers:
 
   1. **Headless** — `Localize.Inputs.Parser`,
-     `Localize.Inputs.Formatter`, `Localize.Inputs.Validator`,
-     `Localize.Inputs.Locale`. Pure Elixir, no Phoenix
-     dependency. Useful from JSON APIs or non-LiveView projects.
+     `Localize.Inputs.Validator`, `Localize.Inputs.Locale`.
+     Pure Elixir, no Phoenix dependency. Useful from JSON APIs
+     or non-LiveView projects. Number formatting goes through
+     `Localize.Number.to_string/2` directly — there is no
+     wrapper here.
 
   2. **Phoenix integration** — `Localize.Inputs.Components`
      (HEEx components) and `Localize.Inputs.Changeset` (Ecto
@@ -24,16 +26,17 @@ defmodule Localize.Inputs do
      cursor preservation, paste sanitisation. Drop-in for
      `Phoenix.LiveView` hooks.
 
-  A web-based visualizer is included for local development at
-  `Localize.Inputs.Visualizer` — see that module for the
-  config gate.
+  For a Plug-based visualizer that demos the component across
+  CLDR locales, see the sibling
+  [`localize_inputs_playground`](https://github.com/elixir-localize/localize_inputs_playground)
+  package — useful during local development, deployable to Fly.io.
 
   ## Quick examples
 
       iex> Localize.Inputs.Parser.parse_number("1.234,56", locale: :de)
       {:ok, Decimal.new("1234.56")}
 
-      iex> Localize.Inputs.Formatter.format_number(Decimal.new("1234.56"), locale: :en)
+      iex> Localize.Number.to_string!(Decimal.new("1234.56"), locale: :en)
       "1,234.56"
 
   """
