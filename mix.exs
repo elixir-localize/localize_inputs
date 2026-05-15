@@ -90,8 +90,10 @@ defmodule Localize.Inputs.MixProject do
         Localize.Inputs.Parser,
         Localize.Inputs.Validator,
         Localize.Inputs.Number,
+        Localize.Inputs.Unit,
         Localize.Inputs.Changeset
       ],
+      Gettext: [Localize.Inputs.Gettext],
       Exceptions: [
         Localize.Inputs.NoNumberSymbolsError,
         Localize.Inputs.ValidationError

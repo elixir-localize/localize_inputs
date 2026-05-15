@@ -1,0 +1,47 @@
+## This file is a PO Template file.
+##
+## "msgid"s here are often extracted from source code.
+## Add new messages manually only if they're dynamic
+## messages that can't be statically extracted.
+##
+## Run "mix gettext.extract" to bring this file up to
+## date. Leave "msgstr"s empty as changing them here has no
+## effect: edit them in PO (.po) files instead.
+#
+msgid ""
+msgstr ""
+
+#: lib/localize/inputs/components.ex:553
+#, elixir-autogen, icu-format
+msgid "All units"
+msgstr ""
+
+#: lib/localize/inputs/components.ex:552
+#, elixir-autogen, icu-format
+msgid "Preferred"
+msgstr ""
+
+#: lib/localize/inputs/components.ex:421
+#, elixir-autogen, icu-format
+msgid "Choose unit"
+msgstr ""
+
+#: lib/localize/inputs/components.ex:436
+#, elixir-autogen, icu-format
+msgid "Close unit picker"
+msgstr ""
+
+#: lib/localize/inputs/components.ex:430
+#, elixir-autogen, icu-format
+msgid "Filter units"
+msgstr ""
+
+#: lib/localize/inputs/components.ex:459
+#, elixir-autogen, icu-format
+msgid "No matches"
+msgstr ""
+
+#: lib/localize/inputs/components.ex:429
+#, elixir-autogen, icu-format
+msgid "Search unit name or code…"
+msgstr ""

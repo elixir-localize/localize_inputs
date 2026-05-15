@@ -110,4 +110,206 @@ export const NumberInput = {
   },
 };
 
-export default { NumberInput, configure };
+// Sheet-variant breakpoint (matches the CSS rule's expectation).
+const UNIT_PICKER_SHEET_BREAKPOINT_PX = 600;
+
+function unitCssEscape(value) {
+  if (typeof window !== "undefined" && window.CSS && CSS.escape) return CSS.escape(value);
+  return value.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+}
+
+export const UnitPicker = {
+  mounted() {
+    this.trigger = this.el.querySelector("[data-unit-picker-trigger]");
+    this.overlay = this.el.querySelector("[data-unit-picker-overlay]");
+    this.search = this.el.querySelector("[data-unit-picker-search]");
+    this.list = this.el.querySelector("[data-unit-picker-list]");
+    this.closeBtn = this.el.querySelector("[data-unit-picker-close]");
+    this.valueInput = this.el.querySelector("[data-unit-picker-value]");
+    this.empty = this.el.querySelector("[data-unit-picker-empty]");
+
+    this.variant = this.el.dataset.variant || "auto";
+
+    this.onTriggerClick = (e) => {
+      e.preventDefault();
+      this.open();
+    };
+    this.onCloseClick = () => this.close();
+    this.onSearchInput = () => this.filter();
+    this.onListClick = (e) => {
+      const row = e.target.closest("[data-unit-picker-row]");
+      if (!row) return;
+      // Mirror the CurrencyPicker contract: stop the document-level
+      // outside-click handler from firing close()+refocus right after
+      // we hand focus to the paired amount input.
+      e.stopPropagation();
+      e.preventDefault();
+      this.selectCode(row.dataset.code, row.dataset.name);
+    };
+    this.onKeydown = (e) => this.handleKeydown(e);
+    this.onDocClick = (e) => {
+      if (!this.el.contains(e.target)) this.close();
+    };
+
+    this.trigger.addEventListener("click", this.onTriggerClick);
+    this.closeBtn.addEventListener("click", this.onCloseClick);
+    this.search.addEventListener("input", this.onSearchInput);
+    this.list.addEventListener("click", this.onListClick);
+    this.el.addEventListener("keydown", this.onKeydown);
+
+    this.applySheetVariant();
+  },
+
+  destroyed() {
+    this.trigger.removeEventListener("click", this.onTriggerClick);
+    this.closeBtn.removeEventListener("click", this.onCloseClick);
+    this.search.removeEventListener("input", this.onSearchInput);
+    this.list.removeEventListener("click", this.onListClick);
+    this.el.removeEventListener("keydown", this.onKeydown);
+    document.removeEventListener("click", this.onDocClick);
+  },
+
+  applySheetVariant() {
+    const useSheet =
+      this.variant === "sheet" ||
+      (this.variant === "auto" &&
+        window.matchMedia(`(max-width: ${UNIT_PICKER_SHEET_BREAKPOINT_PX}px)`).matches);
+    this.el.classList.toggle("is-sheet", useSheet);
+  },
+
+  open() {
+    this.overlay.hidden = false;
+    this.trigger.setAttribute("aria-expanded", "true");
+    this.applySheetVariant();
+
+    // The picker is rendered inside .unit-input-wrapper, which has
+    // overflow:hidden for its rounded corners. Float the overlay
+    // with position:fixed so it escapes the clip region. The sheet
+    // variant already uses position:fixed via CSS.
+    if (!this.el.classList.contains("is-sheet")) {
+      this.positionOverlay();
+      this.repositionHandler = () => this.positionOverlay();
+      window.addEventListener("resize", this.repositionHandler);
+      window.addEventListener("scroll", this.repositionHandler, true);
+    }
+
+    setTimeout(() => {
+      this.search.value = "";
+      this.filter();
+      this.search.focus();
+      document.addEventListener("click", this.onDocClick);
+    }, 0);
+  },
+
+  close({ refocus = true } = {}) {
+    this.overlay.hidden = true;
+    this.trigger.setAttribute("aria-expanded", "false");
+    document.removeEventListener("click", this.onDocClick);
+    if (this.repositionHandler) {
+      window.removeEventListener("resize", this.repositionHandler);
+      window.removeEventListener("scroll", this.repositionHandler, true);
+      this.repositionHandler = null;
+    }
+    this.overlay.style.position = "";
+    this.overlay.style.top = "";
+    this.overlay.style.left = "";
+    this.overlay.style.width = "";
+    if (refocus) this.trigger.focus();
+  },
+
+  positionOverlay() {
+    const rect = this.trigger.getBoundingClientRect();
+    const overlayWidth = Math.max(rect.width, 320);
+    const maxLeft = Math.max(8, window.innerWidth - overlayWidth - 8);
+    this.overlay.style.position = "fixed";
+    this.overlay.style.top = `${rect.bottom + 4}px`;
+    // Right-align under the trigger when possible — better fit for
+    // narrow viewports where the trigger sits on the right of an
+    // input-and-picker pair.
+    const preferred = rect.right - overlayWidth;
+    this.overlay.style.left = `${Math.max(8, Math.min(preferred, maxLeft))}px`;
+    this.overlay.style.width = `${overlayWidth}px`;
+  },
+
+  filter() {
+    const term = this.search.value.trim().toLowerCase();
+    const rows = this.list.querySelectorAll("[data-unit-picker-row]");
+    let visible = 0;
+    rows.forEach((row) => {
+      const hay = `${row.dataset.code} ${row.dataset.name}`.toLowerCase();
+      const match = !term || hay.includes(term);
+      row.hidden = !match;
+      if (match) visible++;
+    });
+    if (this.empty) this.empty.hidden = visible > 0;
+  },
+
+  selectCode(code, displayName) {
+    if (!code) return;
+    this.el.dataset.current = code;
+    const labelNode = this.trigger.querySelector(".unit-picker-current");
+    if (labelNode && displayName) labelNode.textContent = displayName;
+    if (this.valueInput) {
+      this.valueInput.value = code;
+      this.valueInput.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    // Notify the enclosing unit-input wrapper (if any) so other
+    // listeners can react to the unit changing (e.g. swap input
+    // precision based on unit). The hidden input's change event
+    // is also fired above for plain form-binding listeners.
+    const wrapper = this.el.closest("[data-unit-input]");
+    if (wrapper) {
+      wrapper.dispatchEvent(
+        new CustomEvent("localize-inputs:unit-change", {
+          detail: { unit: code, displayName },
+          bubbles: true,
+        }),
+      );
+    }
+
+    // Hand focus back to the paired amount input — picking a unit
+    // is almost always followed by typing/adjusting the amount.
+    const pairedInput = wrapper && wrapper.querySelector("input.unit-input-field");
+    if (pairedInput) {
+      this.close({ refocus: false });
+      pairedInput.focus();
+      const length = pairedInput.value.length;
+      try {
+        pairedInput.setSelectionRange(length, length);
+      } catch (_) {
+        // Not all input types support setSelectionRange; ignore.
+      }
+    } else {
+      this.close();
+    }
+  },
+
+  handleKeydown(e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      this.close();
+      return;
+    }
+    if (this.overlay.hidden) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const rows = Array.from(
+        this.list.querySelectorAll("[data-unit-picker-row]"),
+      ).filter((row) => !row.hidden);
+      if (rows.length === 0) return;
+      const focused = document.activeElement;
+      let idx = rows.indexOf(focused);
+      idx = (idx + (e.key === "ArrowDown" ? 1 : -1) + rows.length) % rows.length;
+      rows[idx].focus();
+    } else if (e.key === "Enter") {
+      const focused = document.activeElement;
+      if (focused && focused.dataset && focused.dataset.code) {
+        e.preventDefault();
+        this.selectCode(focused.dataset.code, focused.dataset.name);
+      }
+    }
+  },
+};
+
+export default { NumberInput, UnitPicker, configure };

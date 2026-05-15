@@ -68,6 +68,136 @@ defmodule Localize.Inputs.Validator do
     if errors == [], do: :ok, else: {:error, ValidationError.exception(errors: errors)}
   end
 
+  @doc """
+  Validates a unit-of-measure form submission.
+
+  Accepts the `%{"amount" => ..., "unit" => ...}` map shape that
+  `Localize.Inputs.Components.unit_input/1` submits. Checks that
+  the amount passes `validate_number/2` and that the unit is a
+  known unit in the given category.
+
+  ### Arguments
+
+  * `value` — a `%{"amount", "unit"}` map (string or atom keys),
+    a bare numeric value, `nil`, or `""`.
+
+  * `options` is a keyword list of options.
+
+  ### Options
+
+  * `:category` — the unit category as a string (e.g. `"length"`).
+    **Required.** The submitted unit is checked against
+    `Localize.Inputs.Unit.all_unit_names/2`.
+
+  * `:required` — when `true`, `nil` amount is rejected.
+
+  * `:min`, `:max`, `:decimals` — forwarded to `validate_number/2`.
+
+  ### Returns
+
+  * `:ok` on success.
+
+  * `{:error, ValidationError.t()}` on any failure — combined
+    amount-validation errors plus a `{:unit, "..."}` error if
+    the unit is missing or not in the category.
+
+  ### Examples
+
+      iex> Localize.Inputs.Validator.validate_unit(
+      ...>   %{"amount" => Decimal.new("1.75"), "unit" => "meter"},
+      ...>   category: "length"
+      ...> )
+      :ok
+
+      iex> {:error, %Localize.Inputs.ValidationError{errors: errors}} =
+      ...>   Localize.Inputs.Validator.validate_unit(
+      ...>     %{"amount" => Decimal.new("1.75"), "unit" => "bogon"},
+      ...>     category: "length"
+      ...>   )
+      iex> Keyword.get(errors, :unit)
+      "\"bogon\" is not a known length unit"
+
+      iex> {:error, %Localize.Inputs.ValidationError{errors: errors}} =
+      ...>   Localize.Inputs.Validator.validate_unit(
+      ...>     %{"amount" => Decimal.new("70"), "unit" => "kilogram"},
+      ...>     category: "length"
+      ...>   )
+      iex> Keyword.get(errors, :unit)
+      "\"kilogram\" is a mass unit, not length"
+
+  """
+  @spec validate_unit(term(), Keyword.t()) :: :ok | {:error, ValidationError.t()}
+  def validate_unit(value, options \\ []) do
+    category = Keyword.fetch!(options, :category)
+
+    {amount, unit} =
+      case value do
+        nil ->
+          {nil, nil}
+
+        "" ->
+          {nil, nil}
+
+        %{} = map ->
+          {Map.get(map, "amount") || Map.get(map, :amount),
+           Map.get(map, "unit") || Map.get(map, :unit)}
+
+        bare ->
+          {bare, nil}
+      end
+
+    errors =
+      []
+      |> check_required(amount, options)
+      |> check_range(amount, options)
+      |> check_decimals(amount, options)
+      |> check_unit(unit, category, options)
+      |> Enum.reverse()
+
+    if errors == [], do: :ok, else: {:error, ValidationError.exception(errors: errors)}
+  end
+
+  defp check_unit(errors, nil, _category, options) do
+    if Keyword.get(options, :required, false) do
+      [{:unit, "unit is required"} | errors]
+    else
+      errors
+    end
+  end
+
+  defp check_unit(errors, unit, category, _options) when is_binary(unit) do
+    # Authoritative validity check: ask Localize.Unit to construct
+    # one. CLDR's `known_units_by_category/0` only lists base units —
+    # SI-prefixed variants like "millimeter" aren't there but are
+    # valid via `Localize.Unit.new/2`. After constructing, verify
+    # the unit's category matches the one the caller expected.
+    case Localize.Unit.new(0, unit) do
+      {:ok, parsed} ->
+        case Localize.Unit.unit_category(parsed) do
+          {:ok, ^category} ->
+            errors
+
+          {:ok, actual} ->
+            [
+              {:unit, "#{inspect(unit)} is a #{actual} unit, not #{category}"}
+              | errors
+            ]
+
+          _ ->
+            [
+              {:unit,
+               "#{inspect(unit)} is not recognised as a #{category} unit"}
+              | errors
+            ]
+        end
+
+      {:error, _} ->
+        [{:unit, "#{inspect(unit)} is not a known #{category} unit"} | errors]
+    end
+  end
+
+  defp check_unit(errors, _, _, _), do: errors
+
   defp check_required(errors, nil, options) do
     if Keyword.get(options, :required, false) do
       [{:required, "is required"} | errors]

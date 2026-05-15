@@ -1,0 +1,46 @@
+## "msgid"s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove "msgid"s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use "mix gettext.extract --merge" or "mix gettext.merge"
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: it\n"
+
+#: lib/localize/inputs/components.ex:553
+#, elixir-autogen, icu-format
+msgid "All units"
+msgstr "Tutte le unità"
+
+#: lib/localize/inputs/components.ex:552
+#, elixir-autogen, icu-format
+msgid "Preferred"
+msgstr "Preferite"
+
+#: lib/localize/inputs/components.ex:421
+#, elixir-autogen, icu-format
+msgid "Choose unit"
+msgstr "Scegli unità"
+
+#: lib/localize/inputs/components.ex:436
+#, elixir-autogen, icu-format
+msgid "Close unit picker"
+msgstr "Chiudi selettore unità"
+
+#: lib/localize/inputs/components.ex:430
+#, elixir-autogen, icu-format
+msgid "Filter units"
+msgstr "Filtra unità"
+
+#: lib/localize/inputs/components.ex:459
+#, elixir-autogen, icu-format
+msgid "No matches"
+msgstr "Nessun risultato"
+
+#: lib/localize/inputs/components.ex:429
+#, elixir-autogen, icu-format
+msgid "Search unit name or code…"
+msgstr "Cerca nome o codice di unità…"
