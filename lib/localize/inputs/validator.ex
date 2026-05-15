@@ -185,8 +185,7 @@ defmodule Localize.Inputs.Validator do
 
           _ ->
             [
-              {:unit,
-               "#{inspect(unit)} is not recognised as a #{category} unit"}
+              {:unit, "#{inspect(unit)} is not recognised as a #{category} unit"}
               | errors
             ]
         end
