@@ -1,0 +1,53 @@
+/* Localize.Inputs baseline styles.
+ *
+ * Imported by consumers via:
+ *
+ *   @import "localize_inputs/priv/static/localize_inputs.css";
+ *
+ * CSS-variable-themable — override the `--li-*` tokens in your
+ * own stylesheet to integrate with Tailwind / DaisyUI / your
+ * design system.
+ */
+
+:root {
+  --li-border: #d4d4d8;
+  --li-border-focus: #047857;
+  --li-bg: #ffffff;
+  --li-bg-muted: #f5f5f4;
+  --li-fg: #1c1917;
+  --li-fg-muted: #78716c;
+  --li-accent: #047857;
+  --li-radius: 0.375rem;
+}
+
+.number-input-wrapper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--li-border);
+  border-radius: var(--li-radius);
+  background: var(--li-bg);
+  overflow: hidden;
+  font-family: inherit;
+  min-width: 12rem;
+}
+
+.number-input-wrapper:focus-within {
+  border-color: var(--li-border-focus);
+  outline: 2px solid var(--li-border-focus);
+  outline-offset: -1px;
+}
+
+.number-input-field {
+  flex: 1;
+  border: 0;
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  color: var(--li-fg);
+  background: transparent;
+  min-width: 0;
+}
+.number-input-field:focus { outline: none; }
+
+.number-input-field.text-left   { text-align: left; }
+.number-input-field.text-center { text-align: center; }
+.number-input-field.text-right  { text-align: right; }
