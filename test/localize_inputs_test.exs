@@ -4,7 +4,7 @@ defmodule Localize.InputsTest do
   doctest Localize.Inputs
   doctest Localize.Inputs.Parser
   doctest Localize.Inputs.Validator
-  doctest Localize.Inputs.Locale
+  doctest Localize.Inputs.Number
 
   describe "Parser.parse_number/2" do
     test "parses en locale conventions" do
@@ -47,34 +47,34 @@ defmodule Localize.InputsTest do
     end
   end
 
-  describe "Locale.for_locale/1" do
+  describe "Number.number_for_locale/1" do
     test "en separators" do
-      assert {:ok, data} = Localize.Inputs.Locale.for_locale(:en)
+      assert {:ok, data} = Localize.Inputs.Number.number_for_locale(:en)
       assert data.decimal == "."
       assert data.group == ","
       assert data.number_system == :latn
     end
 
     test "de separators inverted" do
-      assert {:ok, data} = Localize.Inputs.Locale.for_locale(:de)
+      assert {:ok, data} = Localize.Inputs.Number.number_for_locale(:de)
       assert data.decimal == ","
       assert data.group == "."
     end
 
     test "uses the cldr_locale_id from the validated LanguageTag" do
-      assert {:ok, data} = Localize.Inputs.Locale.for_locale("en-AU")
+      assert {:ok, data} = Localize.Inputs.Number.number_for_locale("en-AU")
       assert is_atom(data.locale)
       assert data.language_tag.cldr_locale_id == data.locale
     end
 
     test "non-Latin number system: ar uses arab digits" do
-      assert {:ok, data} = Localize.Inputs.Locale.for_locale("ar-EG")
+      assert {:ok, data} = Localize.Inputs.Number.number_for_locale("ar-EG")
       assert data.number_system in [:arab, :latn]
     end
 
     test "invalid locale returns a semantic exception" do
       assert {:error, %Localize.InvalidLocaleError{}} =
-               Localize.Inputs.Locale.for_locale("xx-XX")
+               Localize.Inputs.Number.number_for_locale("xx-XX")
     end
   end
 end

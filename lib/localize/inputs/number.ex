@@ -1,4 +1,4 @@
-defmodule Localize.Inputs.Locale do
+defmodule Localize.Inputs.Number do
   @moduledoc """
   Locale-derived display data for number form inputs.
 
@@ -22,7 +22,7 @@ defmodule Localize.Inputs.Locale do
   alias Localize.Number.System
 
   @typedoc """
-  Locale display data resolved by `for_locale/1`.
+  Locale display data resolved by `number_for_locale/1`.
 
   * `:locale` — the canonical CLDR locale id (atom).
 
@@ -76,18 +76,18 @@ defmodule Localize.Inputs.Locale do
 
   ### Examples
 
-      iex> {:ok, info} = Localize.Inputs.Locale.for_locale(:en)
+      iex> {:ok, info} = Localize.Inputs.Number.number_for_locale(:en)
       iex> {info.decimal, info.group, info.number_system}
       {".", ",", :latn}
 
-      iex> {:ok, info} = Localize.Inputs.Locale.for_locale(:de)
+      iex> {:ok, info} = Localize.Inputs.Number.number_for_locale(:de)
       iex> {info.decimal, info.group}
       {",", "."}
 
   """
-  @spec for_locale(LanguageTag.t() | atom() | String.t() | nil) ::
+  @spec number_for_locale(LanguageTag.t() | atom() | String.t() | nil) ::
           {:ok, t()} | {:error, Exception.t()}
-  def for_locale(locale \\ nil) do
+  def number_for_locale(locale \\ nil) do
     with {:ok, language_tag} <- Localize.validate_locale(locale || Localize.get_locale()),
          {:ok, number_system} <- System.number_system_from_locale(language_tag),
          {:ok, symbols} <- resolve_symbols(language_tag, number_system) do

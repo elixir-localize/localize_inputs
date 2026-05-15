@@ -24,7 +24,7 @@ if Code.ensure_loaded?(Phoenix.Component) do
 
     use Phoenix.Component
 
-    alias Localize.Inputs.Locale
+    alias Localize.Inputs.Number
 
     @doc """
     Locale-aware plain-number input.
@@ -136,7 +136,7 @@ if Code.ensure_loaded?(Phoenix.Component) do
     defp assign_common(assigns) do
       locale = assigns[:locale] || Localize.get_locale()
 
-      {:ok, locale_data} = Locale.for_locale(locale)
+      {:ok, locale_data} = Number.number_for_locale(locale)
 
       field_struct = assigns.form[assigns.field]
       name = field_struct.name

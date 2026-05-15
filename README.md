@@ -41,7 +41,7 @@ Localize.Number.to_string!(decimal, locale: :en)
 
 :ok = Localize.Inputs.Validator.validate_number(decimal, min: 0)
 
-{:ok, info} = Localize.Inputs.Locale.for_locale(:de)
+{:ok, info} = Localize.Inputs.Number.number_for_locale(:de)
 info.decimal   #=> ","
 info.group     #=> "."
 ```

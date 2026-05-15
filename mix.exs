@@ -81,7 +81,7 @@ defmodule Localize.Inputs.MixProject do
       "Headless API": [
         Localize.Inputs.Parser,
         Localize.Inputs.Validator,
-        Localize.Inputs.Locale,
+        Localize.Inputs.Number,
         Localize.Inputs.Changeset
       ],
       Exceptions: [

@@ -11,7 +11,7 @@ defmodule Localize.Inputs do
   The package ships three layers:
 
   1. **Headless** — `Localize.Inputs.Parser`,
-     `Localize.Inputs.Validator`, `Localize.Inputs.Locale`.
+     `Localize.Inputs.Validator`, `Localize.Inputs.Number`.
      Pure Elixir, no Phoenix dependency. Useful from JSON APIs
      or non-LiveView projects. Number formatting goes through
      `Localize.Number.to_string/2` directly — there is no
